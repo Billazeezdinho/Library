@@ -6,9 +6,9 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         defaultValue: Sequelize.UUIDV4,
-        unique: true,
+        unique: true
       },
       title: {
         type: Sequelize.STRING,
@@ -30,8 +30,8 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-        model: "Users",
-        key: "id"
+        model: 'Users',
+        key: 'id'
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",

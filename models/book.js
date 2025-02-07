@@ -7,7 +7,7 @@ const sequelize = require('../database/sequelize');
     }
   }
   book.init({
-    id:{ type:DataTypes.UUID,
+    id:{ type:DataTypes.STRING,
       primaryKey: true,
       unique: true,
       allowNull: false,
@@ -33,7 +33,7 @@ const sequelize = require('../database/sequelize');
       type:DataTypes.UUID,
       allowNull:false,
       references:{
-        model: 'Users',
+        model: 'User',
         key: 'id'
       },
       onUpdate: 'CASCADE',

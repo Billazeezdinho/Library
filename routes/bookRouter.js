@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { createBook, getAllBooks, getOneBook, updatedBook, deleteBook } = require('../controllers/bookController')
 
-router.post('/book', createBook);
+router.post('/book/:id', createBook);
 
 router.get('/books', getAllBooks);
 

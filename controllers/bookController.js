@@ -1,23 +1,18 @@
 const book = require('../models/book');
 const User = require('../models/user');
-const { Op } = require('../database/sequelize')
+const { Op } = require('../database/sequelize');
+const { v4 :uuid } = require('uuid');
 
 exports.createBook = async (req, res) => {
     try {
-        const { title, author, published_year, genre } = req.body;
-        const added_by = req.user.id;
-        const userExists = await User.findByPk(added_by);
-        if (!userExists) {
-            return res.status(404).json({
-                message: 'User not found'
-            })
-        }
+        const { title, author, published_year, genre  } = req.body;
         const newBook = await book.create({
+            id: uuid(),
             title,
             author,
             published_year,
             genre,
-            added_by
+            added_by:req.params.id
         });
         res.status(201).json({
             message: 'Book Added Successfully',
@@ -36,6 +31,7 @@ exports.createBook = async (req, res) => {
 exports.getAllBooks = async (req, res) => {
     try {
         const books = await book.findAll({ where: {published_year:{[Op.lt]:2000}}});
+        // console.log(books);
         res.status(201).json({
             message: 'All book fetched successfully',
             data: books
@@ -52,15 +48,15 @@ exports.getAllBooks = async (req, res) => {
 exports.getOneBook = async(req, res) => {
     try{
     const { title } = req.params;
-    const book = await book.findOne({where: {title: title}});
-    if(!book){
+    const oneBook = await book.findOne({where: {title: title}});
+    if(!oneBook){
         return res.status(404).json({
-            message: 'Book not found'
+            // message: 'Book not found'
         })
     }
     res.status(200).json({
         message: 'Book fetched successfully',
-        data: book
+        data: oneBook
     })
 
     }catch(error){
@@ -74,18 +70,31 @@ exports.getOneBook = async(req, res) => {
 //update a book added by user
 exports.updatedBook = async(req, res) => {
     try {
-        const { title } = req.params;
-        const book = await User.findOne({where: {username : username} })
+        const { added_by } = req.params.id;
+        const { title, author, published_year, genre } = req.body;
+        const book = await User.findOne({where: { added_by : added_by} })
         if(!book){
             return res.status(404).json({
                 message: 'Book not found'
             })
+        }else{
+            const data = {
+                title,
+                author,
+                published_year,
+                genre,
+            };
+            //update the data to the database
+            await User.update(data, {where: { added_by: added_by } });
+            // Fetching that book to see the changes made
+            const updatedBook = await book.findAll({ where: { added: added_by } });
+            
+            //send a success response
+            res.status(200).json({
+                message: 'Book updated successfully',
+                data: updatedBook
+            })
         }
-        const updatedBook = await book.update(req.body);
-        res.status(200).json({
-            message: 'Book updated successfully',
-            data: updatedBook
-        })
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -99,16 +108,17 @@ exports.updatedBook = async(req, res) => {
 exports.deleteBook = async(req, res)=>{
     try {
         const { title } = req.params;
-        const book = await User.findOne({where: {username : username} })
-        if(!book){
+        const book = await User.findOne({where: { title : title} })
+        if(book.length == 0 ){
             return res.status(404).json({
                 message: 'Book not found'
             })
-        }
-        await book.destroy();
+        }else{
+        await book.destroy({where: {title : title}});
         res.status(200).json({
             message: 'Book deleted successfully'
         })  
+        };
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -117,3 +127,5 @@ exports.deleteBook = async(req, res)=>{
         
     }
 }
+
+

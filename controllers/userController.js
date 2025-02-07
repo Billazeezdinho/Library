@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const {v4 : uuid} = require('uuid');
 
 //register a user with email, username and password
 exports.createUser = async (req, res) =>{
